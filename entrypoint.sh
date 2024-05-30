@@ -18,15 +18,27 @@ sed -i 's/$/\x0/' "${SIGUL_PASS_FILE}"
 
 cd "$GITHUB_WORKSPACE" || exit 1
 if [ "$SIGN_TYPE" = "sign-data" ]; then
-    while read -r filename && [ -n "$filename" ]; do
-        echo "Signing $filename"
-        filename_dashed="${filename//\//-}"
-        sigul --batch "$SIGN_TYPE" -o "$filename_dashed.asc" "$SIGUL_KEY_NAME" \
-            "$filename" < "${SIGUL_PASS_FILE}"
+    # Read lines from SIGN_OBJECT until we run out
+    while read -r filename && [[ -n "$filename" ]]; do
+        # If the object includes a wildcard, we need to parse the file list
+        if [[ $filename =~ \* ]]; then
+            for wcfile in $filename; do
+                # Don't sign directories or symlinks
+                if [[ ! -f $wcfile ]]; then
+                    continue
+                fi
+                echo "Signing $wcfile"
+                sigul --batch "$SIGN_TYPE" -o "$wcfile.asc" "$SIGUL_KEY_NAME" \
+                    "$wcfile" < "${SIGUL_PASS_FILE}"
+                chmod 644 "$wcfile.asc"
+            done
+        else
+            echo "Signing $filename"
+            sigul --batch "$SIGN_TYPE" -o "$filename.asc" "$SIGUL_KEY_NAME" \
+                "$filename" < "${SIGUL_PASS_FILE}"
+            chmod 644 "$filename.asc"
+        fi
     done <<< "${SIGN_OBJECT}"
-    # We need the signature files to be readable by the workflow
-    ls -al
-    chmod 644 ./*.asc
 elif [ "$SIGN_TYPE" = "sign-git-tag" ]; then
     git remote add github "https://${GH_USER}:${GH_KEY}@github.com/${GITHUB_REPOSITORY}"
     git fetch --tags
