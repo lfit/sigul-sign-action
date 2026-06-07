@@ -1,19 +1,12 @@
-FROM centos:7
+# The sigul client image is built and published from the releng/sigul-docker
+# project on gerrit.linuxfoundation.org (docker.io/lfreleng/sigul). Basing this
+# action on that image keeps the CentOS 7 / sigul install logic in a single
+# place instead of duplicating it here.
+#
+# Pinned by digest for reproducibility. Human-readable tag: 0.1.0
+FROM docker.io/lfreleng/sigul@sha256:e8b958a6e5ba3ee6334c0244e9fbe0881248133e97bc77236a176baa5d219cbd
 
 LABEL maintainer="<eball@linuxfoundation.org>"
-
-SHELL ["/bin/bash", "-c"]
-
-RUN echo $'[fedora-infra-sigul] \n\
-name=Fedora builder packages for sigul \n\
-baseurl=https://kojipkgs.fedoraproject.org/repos-dist/epel\$releasever-infra/latest/\$basearch/ \n\
-enabled=1 \n\
-gpgcheck=1 \n\
-gpgkey=https://infrastructure.fedoraproject.org/repo/infra/RPM-GPG-KEY-INFRA-TAGS \n\
-includepkgs=sigul* \n\
-skip_if_unavailable=True' > /etc/yum.repos.d/fedora-infra-sigul.repo
-
-RUN yum install -y -q sigul git
 
 COPY entrypoint.sh /entrypoint.sh
 
