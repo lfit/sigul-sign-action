@@ -28,13 +28,13 @@ if [ "$SIGN_TYPE" = "sign-data" ]; then
                     continue
                 fi
                 echo "Signing $wcfile"
-                sigul --batch "$SIGN_TYPE" -o "$wcfile.asc" "$SIGUL_KEY_NAME" \
+                sigul --batch "$SIGN_TYPE" -a -o "$wcfile.asc" "$SIGUL_KEY_NAME" \
                     "$wcfile" < "${SIGUL_PASS_FILE}"
                 chmod 644 "$wcfile.asc"
             done
         else
             echo "Signing $filename"
-            sigul --batch "$SIGN_TYPE" -o "$filename.asc" "$SIGUL_KEY_NAME" \
+            sigul --batch "$SIGN_TYPE" -a -o "$filename.asc" "$SIGUL_KEY_NAME" \
                 "$filename" < "${SIGUL_PASS_FILE}"
             chmod 644 "$filename.asc"
         fi
