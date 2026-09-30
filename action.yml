@@ -7,7 +7,9 @@ inputs:
     required: false
     default: "sign-data"
   sign-object:
-    description: "File or git tag to sign"
+    description: >
+      File or git tag to sign. For 'sign-data', one path per line; a line
+      containing '*' is expanded as a shell wildcard.
     required: true
   sigul-ip:
     description: "IP address of sigul server"
@@ -30,9 +32,11 @@ inputs:
   gh-user:
     description: "GitHub user for pushing signed tags"
     required: false
-    default: GITHUB_ACTOR
+    default: ${{ github.actor }}
   gh-key:
-    description: "GitHub API key for pushing signed tags"
+    description: >
+      GitHub token for pushing signed tags. Required for 'sign-git-tag';
+      leave unset for 'sign-data'.
     required: false
 
 runs:
